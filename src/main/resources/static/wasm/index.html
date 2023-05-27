@@ -102,22 +102,31 @@
 
         document.querySelector("#validate-on-client").addEventListener("click", validateOnClient);
 
-        function validateOnServer() {
-            fetch("/api/hello/", {
-                method: "POST",
-                mode: "cors",
-                cache: "no-cache",
-                credentials: "same-origin",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                redirect: "follow",
-                referrerPolicy: "no-referrer",
-                body: JSON.stringify(getCurrentOrder()),
-            }).then(async a => {
-                const data = await a.json();
-                appendResult({errors: data.errors, errorMappedToField: Object.entries(data.errorMappedToField)});
-            });
+        async function validateOnServer() {
+            try {
+                const response = await fetch("/api/hello/", {
+                    method: "POST",
+                    mode: "cors",
+                    cache: "no-cache",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    redirect: "follow",
+                    referrerPolicy: "no-referrer",
+                    body: JSON.stringify(getCurrentOrder()),
+                });
+                if (response.status !== 200) {
+                    appendResult({errors:[`${response.status} ${response.statusText}`], errorsMappedToField:[]});
+                    return;
+                }
+                const data = await response.json();
+                const errorsMappedToField = new Map(Object.entries(data.errorsMappedToField));
+                appendResult({errors: data.errors, errorsMappedToField});
+            } catch(e) {
+                console.error(e);
+                appendResult({errors:[e], errorsMappedToField:[]});
+            }
         }
 
         document.querySelector("#validate-on-server").addEventListener("click", validateOnServer);
