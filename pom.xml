@@ -50,6 +50,7 @@
 				<version>${bytecoder.version}</version>
 				<executions>
 					<execution>
+						<?m2e execute onConfiguration,onIncremental?>
 						<id>js</id>
 						<goals>
 							<goal>compile</goal>
@@ -62,6 +63,7 @@
 						</configuration>
 					</execution>
 					<execution>
+						<?m2e execute onConfiguration,onIncremental?>
 						<id>wasm</id>
 						<goals>
 							<goal>compile</goal>
@@ -71,6 +73,26 @@
 							<backend>wasm</backend>
 							<optimizationLevel>ALL</optimizationLevel>
 							<buildDirectory>src/main/resources/static/wasm</buildDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-resource-one</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target/static</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/main/resources/static</directory>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
