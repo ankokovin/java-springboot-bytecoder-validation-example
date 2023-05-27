@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../style.css">
+    <title>JS // Java SpringBoot Bytecoder Validation</title>
+</head>
+
+<body>
+    <h1>Java SpringBoot Bytecoder Validation</h1>
+    <h2>Compiled to JS</h2>
+    <a href="../index.html">Back</a>
+    <script type="text/javascript" src="bytecoder/bytecoderclasses.js"></script>
+    <fieldset>
+        <legend>Order</legend>
+        <div>
+            <label for="id">id</label>
+            <input id="id" type="number" />
+            <span id="id-error" style="color:red"></span>
+        </div>
+        <div>
+            <label for="name">name</label>
+            <input id="name" type="text" />
+            <span id="name-error" style="color:red"></span>
+        </div>
+    </fieldset>
+    <button id="validate-on-client">Validate on client</button>
+    <button id="validate-on-server">Validate on server (will not work on Github Pages)</button>
+    <div id="result"></div>
+    <script type="text/javascript">
+        const fieldList = ['id', 'name'];
+
+        const idInput = document.querySelector("#id");
+        const nameInput = document.querySelector("#name");
+
+        function getCurrentOrder() {
+            const id = idInput.value;
+            const name = nameInput.value;
+            return { id, name };
+        }
+
+        function getCurrentOrderByteCoder() {
+            const order = getCurrentOrder();
+            order.name = bytecoder.toBytecoderString(order.name);
+            return order;
+        }
+
+        const resultLog = document.querySelector("#result");
+
+        function appendResult(result) {
+            fieldList.forEach(field => {
+                document.querySelector(`#${field}-error`).textContent = "";
+            })
+
+
+            const template = document.querySelector("#error");
+            const errorClone = template.content.cloneNode(true);
+            errorClone.querySelector(".error-info").textContent = new Date().toISOString();
+
+            const errorList = errorClone.querySelector(".error-list")
+            result?.errors?.forEach(error => {
+                const listElement = document.createElement("li");
+                listElement.textContent = error;
+                errorList.appendChild(listElement);
+            });
+
+            const errorMap = errorClone.querySelector(".error-map")
+            result?.errorsMappedToField?.forEach((error, field) => {
+                const listElement = document.createElement("li");
+                listElement.textContent = `${field}: ${error}`;
+                errorList.appendChild(listElement);
+
+                document.querySelector(`#${field}-error`).textContent = error;
+            });
+
+            resultLog.appendChild(errorClone);
+        }
+
+        //There has to be a better way?
+        function mapBack(result) {
+            const errors = result.errors.elementData.data.slice(0, result.errors.size).map(bytecoder.toJSString);
+            const errorsMappedToField = result
+                                        ?.errorsMappedToField
+                                        ?.table
+                                        ?.data
+                                        ?.filter(Boolean)
+                                        .map(node => [bytecoder.toJSString(node.key), bytecoder.toJSString(node.value)]);
+            return {errors, errorsMappedToField: new Map(errorsMappedToField)};
+        }
+
+        function validateOnClient() {
+            appendResult(mapBack(bytecoder.exports.validate(getCurrentOrderByteCoder())));
+        }
+
+        document.querySelector("#validate-on-client").addEventListener("click", validateOnClient);
+
+        function validateOnServer() {
+            fetch("/api/hello/", {
+                method: "POST",
+                mode: "cors",
+                cache: "no-cache",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                redirect: "follow",
+                referrerPolicy: "no-referrer",
+                body: JSON.stringify(getCurrentOrder()),
+            }).then(async a => {
+                const data = await a.json();
+                const errorsMappedToField = new Map(Object.entries(data.errorsMappedToField));
+                appendResult({errors: data.errors, errorsMappedToField});
+            });
+        }
+
+        document.querySelector("#validate-on-server").addEventListener("click", validateOnServer);
+    </script>
+
+<template id="error">
+    <div class="error">
+        <p class="error-info"></p>
+        <ul class="error-list"></ul>
+        <ul class="error-map"></ul>
+    </div>
+</template>
+
+</body>
+
+</html>

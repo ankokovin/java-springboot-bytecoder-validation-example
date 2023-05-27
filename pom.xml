@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.1.0</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.example</groupId>
+	<artifactId>java-springboot-bytecoder-validation</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>java-springboot-bytecoder-validation</name>
+	<description>Demo project for Spring Boot</description>
+	<properties>
+		<java.version>20</java.version>
+		<bytecoder.version>2023-05-19</bytecoder.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/de.mirkosertic.bytecoder/bytecoder.web -->
+		<dependency>
+			<groupId>de.mirkosertic.bytecoder</groupId>
+			<artifactId>bytecoder.web</artifactId>
+			<version>${bytecoder.version}</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>de.mirkosertic.bytecoder</groupId>
+				<artifactId>bytecoder-mavenplugin</artifactId>
+				<version>${bytecoder.version}</version>
+				<executions>
+					<execution>
+						<id>js</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<mainClass>com.example.javaspringbootbytecodervalidation.bytecoder.OrderValidator</mainClass>
+							<optimizationLevel>ALL</optimizationLevel>
+							<backend>js</backend>
+							<buildDirectory>src/main/resources/static/js</buildDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>wasm</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<mainClass>com.example.javaspringbootbytecodervalidation.bytecoder.OrderValidator</mainClass>
+							<backend>wasm</backend>
+							<optimizationLevel>ALL</optimizationLevel>
+							<buildDirectory>src/main/resources/static/wasm</buildDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
