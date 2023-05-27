@@ -11,6 +11,9 @@ name: Java CI with Maven
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - src/**
+      - .github/**
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
